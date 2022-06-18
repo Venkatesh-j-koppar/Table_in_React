@@ -1,12 +1,19 @@
-import react, { Fragment, useState } from "react"
+import  { Fragment, useState } from "react"
 import data from "./data.json"
 import {nanoid} from "nanoid";
 import Editform from "./components/Editform";
+import ReadOnly from "./components/ReadOnly";
 const App=()=>
 {
   const [contact,setContact]=useState(data);
-  const [edit,setEdit]=useState(false);
+  const [edit,setEdit]=useState("");
   const [newentry,setNewEntry]=useState({
+    fullName:"",
+    address:"",
+    phoneNumber:"",
+    email:""
+  } )
+  const [neweditentry,setNewEditEntry]=useState({
     fullName:"",
     address:"",
     phoneNumber:"",
@@ -14,17 +21,35 @@ const App=()=>
   } )
   
   const handleChangeInAddForm=(event)=>{
+
     event.preventDefault();
-    
     const fieldName=event.target.getAttribute("name");
     const value=event.target.value;
-
     const objcreation={...newentry}
     objcreation[fieldName]=value;
     
-    setNewEntry(objcreation)
+    setNewEntry(objcreation);
     
   }
+
+  const handleChangeInEditForm=(event)=>{
+    event.preventDefault();
+
+    const fieldName=event.target.getAttribute("name");
+    const value=event.target.value;
+    console.log(fieldName)
+    console.log(value)
+
+  
+    const objcreation={...neweditentry}
+    objcreation[fieldName]=value;
+    setNewEditEntry(objcreation);
+
+  }
+
+
+
+
   const addNewContactSubmit=(event)=>{
     event.preventDefault();
     
@@ -42,12 +67,39 @@ const App=()=>
 
   }
 
+  const clickOnEdit=(id,currcontact)=>{
+    
+    setEdit(id);
+    setNewEditEntry(currcontact);
+  }
+
+  const handleEditSubmit=(event)=>{
+    event.preventDefault();
+
+    const editform={
+      id:edit,
+      fullName:neweditentry.fullName,
+      address:neweditentry.address,
+      phoneNumber:neweditentry.phoneNumber,
+      email:neweditentry.email
+
+    }
+
+    const index=contact.findIndex((contact)=>contact.id===edit)
+    console.log(index)
+
+    contact[index]=editform;
+    setEdit("")
+
+  }
+
  
     
 
   return (
     <div>
       <h1>Contact Details</h1>
+      <form onSubmit={handleEditSubmit}>
     <table>
       <thead>
         <tr>
@@ -62,22 +114,15 @@ const App=()=>
         {
           contact.map((contact)=>
             <Fragment>
-        {edit?<Editform contact={contact}></Editform>:null}
-            <tr>
-              <td >{contact.fullName}</td>
-              <td>{contact.address}</td>
-              <td>{contact.phoneNumber}</td>
-              <td>{contact.email}</td>
-              <td>
-                <button onClick={()=>{setEdit(true)}}>Edit</button>
-              </td>
-            </tr>
+        {(edit===contact.id)?<Editform neweditentry={neweditentry} handleChangeInEditForm={handleChangeInEditForm}></Editform>:<ReadOnly contact={contact} setEdit={setEdit}  clickOnEdit={clickOnEdit}></ReadOnly>}
+            
             </Fragment>
           )
 
         }
       </tbody>
     </table>
+    </form>
         <h1>Add New Contact</h1>
         <div>
         <form onSubmit={addNewContactSubmit} id="myform" method="post">
